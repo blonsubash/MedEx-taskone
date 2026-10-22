@@ -1,0 +1,84 @@
+@import url("./reset.css");
+
+:root {
+  color-scheme: light;
+  font-family: Arial, Helvetica, sans-serif;
+
+  --color-primary: #6c009e;
+  --color-primary-dark: #4a0480;
+  --color-primary-light: #a442a0;
+  --color-accent: #ee4525;
+  --color-accent-pink: #f2295b;
+  --color-text: #223a66;
+  --color-text-muted: #666666;
+  --color-background: #f5f5f5;
+  --color-surface: #ffffff;
+  --color-border: #e7e7e7;
+  --gradient-brand: linear-gradient(
+    90deg,
+    var(--color-primary-light),
+    var(--color-primary-dark)
+  );
+
+  color: var(--color-text);
+  background: var(--color-background);
+}
+
+.site-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-height: 5rem;
+  padding: 1rem clamp(1.25rem, 5vw, 4rem);
+  border-bottom: 1px solid var(--color-border);
+  border-image: var(--gradient-brand) 1;
+  background: var(--color-surface);
+}
+
+.brand {
+  color: var(--color-primary);
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.site-label {
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}
+
+.page-content {
+  width: min(100%, 72rem);
+  margin-inline: auto;
+  padding: clamp(3rem, 8vw, 7rem) 1.25rem;
+}
+
+.eyebrow {
+  margin-bottom: 1rem;
+  color: var(--color-primary);
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+h1 {
+  max-width: 16ch;
+  color: var(--color-primary);
+  font-size: clamp(2.25rem, 5vw, 4rem);
+  line-height: 1.1;
+  letter-spacing: -0.04em;
+}
+
+.intro {
+  max-width: 36rem;
+  margin-top: 1.5rem;
+  color: var(--color-text-muted);
+  font-size: 1.125rem;
+  line-height: 1.7;
+}
+
+.placeholder {
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
