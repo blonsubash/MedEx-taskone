@@ -79,6 +79,40 @@ describe("mobile filter drafts", () => {
     expect(applied).toMatchObject({ currency: "THB", minPrice: null, maxPrice: "5000", page: 3 });
   });
 
+  it("previews successive price edits without changing applied prices or results", () => {
+    const applied = parse("provider=48&currency=THB&max=0&sort=rating");
+    let draft = updateFilterDraft(createFilterDraft(applied), { maxPrice: "5000.00" }, categories);
+    expect(draft.maxPrice).toBe("5000");
+    expect(filterServices(entries, draft)).toHaveLength(36);
+    draft = updateFilterDraft(draft, { maxPrice: "5000.005" }, categories);
+    expect(draft.maxPrice).toBe("5000.005");
+    expect(applied.maxPrice).toBe("0");
+    expect(filterServices(entries, applied)).toHaveLength(2);
+  });
+
+  it("recovers from incomplete or invalid draft amounts using the shared parser", () => {
+    const applied = parse("provider=48&currency=THB&max=0");
+    let draft = updateFilterDraft(createFilterDraft(applied), { maxPrice: "5000." }, categories);
+    expect(draft).toMatchObject({ currency: "THB", maxPrice: null });
+    expect(filterServices(entries, draft)).toHaveLength(53);
+    draft = updateFilterDraft(draft, { maxPrice: "5000.00" }, categories);
+    expect(draft.maxPrice).toBe("5000");
+    expect(filterServices(entries, draft)).toHaveLength(36);
+    expect(applied.maxPrice).toBe("0");
+  });
+
+  it("applies the price preview with all other draft changes in one URL update", () => {
+    const original = new URLSearchParams("provider=48&currency=THB&max=0&sort=rating&page=4&note=keep");
+    let draft = updateFilterDraft(createFilterDraft(parseExplorerState(original)), { maxPrice: "5000.00" }, categories);
+    draft = updateFilterDraft(draft, { types: ["lab_test"] }, categories);
+    const next = updateExplorerQuery(original, { ...draft, page: 1 });
+    expect(parseExplorerState(next)).toMatchObject({ providerIds: [48], currency: "THB", maxPrice: "5000",
+      types: ["lab_test"], sort: "rating", page: 1 });
+    expect(filterServices(entries, parseExplorerState(next))).toHaveLength(10);
+    expect(next.get("note")).toBe("keep");
+    expect(parseExplorerState(original)).toMatchObject({ types: [], maxPrice: "0", page: 4 });
+  });
+
   it("starts fresh from current applied selections when a discarded draft is reopened", () => {
     const applied = parse("provider=48&type=lab_test");
     const discarded = updateFilterDraft(createFilterDraft(applied), { homeTest: true }, categories);

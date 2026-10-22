@@ -20,9 +20,10 @@ type Props = {
   providers: ProviderOption[];
   ready: boolean;
   facets: FacetCounts | null;
+  immediate?: boolean;
 };
 
-export function ExplorerFilters({ state, update, locations, categories, providers, ready, facets }: Props) {
+export function ExplorerFilters({ state, update, locations, categories, providers, ready, facets, immediate = false }: Props) {
   const locationValue = state.location ? `${state.location.kind}:${state.location.id}` : "";
   const locationChoices = new Map<string, LocationFilter>();
   for (const country of locations) {
@@ -134,7 +135,7 @@ export function ExplorerFilters({ state, update, locations, categories, provider
             : "Choose a category to see its subcategories."}</p>
         </fieldset>
       </div>
-      <PriceFilter state={state} update={update} ready={ready} facets={facets} />
+      <PriceFilter state={state} update={update} ready={ready} facets={facets} immediate={immediate} />
       <ProviderFilter providers={providers} selectedIds={state.providerIds} update={update} ready={ready} counts={facets?.providers ?? null} />
     </div>
   );

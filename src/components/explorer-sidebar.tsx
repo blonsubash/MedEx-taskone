@@ -40,7 +40,7 @@ function FilterControls({ state, update, locations, categories, providers, ready
   return <>
     <CatalogSearch query={state.query} update={update} immediate={draft} />
     <ExplorerFilters state={state} update={update} locations={locations}
-      categories={categories} providers={providers} ready={ready} facets={facets} />
+      categories={categories} providers={providers} ready={ready} facets={facets} immediate={draft} />
   </>;
 }
 
@@ -115,7 +115,7 @@ function FilterDrawer({ children, count, ready, cancel, apply, trigger, baseline
   }, [appliedKey, baseline]);
 
   return (
-    <dialog ref={dialog} id="mobile-filters" className="mobile-filter-drawer" aria-labelledby="drawer-title"
+    <dialog ref={dialog} id="mobile-filters" className="mobile-filter-drawer" aria-labelledby="drawer-title" aria-describedby="drawer-description"
       onCancel={(event) => { event.preventDefault(); cancel(); }}
       onClose={(event) => {
         // React's development effect replay can queue a close event before reopening.
@@ -149,7 +149,10 @@ function FilterDrawer({ children, count, ready, cancel, apply, trigger, baseline
           event.clientY < bounds.top || event.clientY > bounds.bottom) cancel();
       }}>
       <header className="drawer-header">
-        <h2 id="drawer-title">Filters</h2>
+        <div>
+          <h2 id="drawer-title">Filters</h2>
+          <p id="drawer-description" className="filter-help">Preview changes, then show services to apply.</p>
+        </div>
         <button type="button" className="drawer-close" aria-label="Close filters" autoFocus onClick={cancel}>×</button>
       </header>
       <div className="drawer-body">{children}</div>

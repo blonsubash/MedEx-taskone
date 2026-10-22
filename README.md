@@ -44,7 +44,7 @@ I used Codex to speed up setup and implementation, explore edge cases in the sup
 
 Initial setup verified a clean `npm ci` and development-page rendering in a browser.
 
-All 355 tests pass, covering mock endpoints, catalog normalization, pricing, URL state, provider results, filter controls, search, mobile drafts, currency-scoped price ranges, sorting, pagination, live facet counts, and applied filter summaries. Lint, standalone type checking, and the production build also pass. HTTP checks confirmed exact fixture responses, the default delay, forced failures, successful retries, invalid delay handling, and unsupported-method responses.
+All 359 tests pass, covering mock endpoints, catalog normalization, pricing, URL state, provider results, filter controls, search, mobile drafts, currency-scoped price ranges, sorting, pagination, live facet counts, and applied filter summaries. Lint, standalone type checking, and the production build also pass. HTTP checks confirmed exact fixture responses, the default delay, forced failures, successful retries, invalid delay handling, and unsupported-method responses.
 
 Next.js supports ESLint 10, but some bundled plugins still declare older peer ranges; npm can report peer dependency warnings during installation. Linting was verified with this configuration; see the [Next.js ESLint documentation](https://nextjs.org/docs/app/api-reference/config/eslint).
 

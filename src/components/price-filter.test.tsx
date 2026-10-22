@@ -9,10 +9,10 @@ import { parseExplorerState } from "@/lib/explorer-state";
 import { PriceFilter } from "./price-filter";
 
 const entries = prepareServices(normalizeCatalog(fixture).services);
-function render(query = "", ready = true) {
+function render(query = "", ready = true, immediate = false) {
   const state = parseExplorerState(new URLSearchParams(query));
   return renderToStaticMarkup(<PriceFilter state={state} update={vi.fn()} ready={ready}
-    facets={ready ? getFacetCounts(entries, state) : null} />);
+    facets={ready ? getFacetCounts(entries, state) : null} immediate={immediate} />);
 }
 
 describe("PriceFilter", () => {
@@ -50,5 +50,12 @@ describe("PriceFilter", () => {
     expect(html).toMatch(/<fieldset[^>]*disabled=""/);
     expect(html).toContain('value="INR" selected=""');
     expect(html).toContain('value="900"');
+  });
+  it("uses live mobile previews with one final drawer Apply action", () => {
+    const mobile = render("currency=THB&max=5000", true, true);
+    expect(mobile).toContain("Preview updates as you type.");
+    expect(mobile).not.toContain(">Apply range</button>");
+    expect(mobile).toContain("Clear range");
+    expect(render("currency=THB")).toContain(">Apply range</button>");
   });
 });
