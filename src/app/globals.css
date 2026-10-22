@@ -421,6 +421,64 @@ select:focus-visible {
   cursor: default;
 }
 
+.price-filter {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.price-filter > label,
+.price-inputs label {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.price-filter > label {
+  margin-bottom: 0.5rem;
+}
+
+.price-range {
+  margin-top: 1rem;
+}
+
+.price-inputs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.625rem;
+}
+
+.price-inputs input {
+  width: 100%;
+  min-width: 0;
+  height: auto;
+  min-height: 2.75rem;
+  margin-top: 0.5rem;
+  padding: 0.625rem 0.5rem;
+  border: 1px solid #b5b5b5;
+  border-radius: 0.5rem;
+  color: var(--color-text);
+  background: var(--color-surface);
+  font: inherit;
+  font-weight: 400;
+}
+
+.price-inputs input:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.price-range-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.625rem;
+  margin-top: 0.75rem;
+}
+
+#price-range-notice:empty {
+  display: none;
+}
+
 .provider-picker {
   margin-top: 1.5rem;
   padding-top: 1rem;

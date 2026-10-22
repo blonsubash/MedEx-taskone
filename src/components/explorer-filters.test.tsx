@@ -43,7 +43,9 @@ describe("ExplorerFilters", () => {
 
   it("disables controls until the catalog is ready without losing URL selections", () => {
     const html = render("type=wellness&city=bangkok&home=true", false);
-    expect(html.match(/disabled=""/g)).toHaveLength(7);
+    for (const label of ["Service types", "Location", "Availability", "Category", "Subcategory", "Price"]) {
+      expect(html).toMatch(new RegExp(`<fieldset[^>]*disabled=""[^>]*><legend>${label}</legend>`));
+    }
     expect(html.match(/checked=""/g)).toHaveLength(2);
     expect(html).toContain('value="city:bangkok" selected=""');
     expect(html).toContain("Selected location");
@@ -81,11 +83,11 @@ describe("ExplorerFilters", () => {
 
   it("disables the child control until a parent with children is selected", () => {
     expect(render()).toContain("Select a category first");
-    expect(render().match(/disabled=""/g)).toHaveLength(2);
+    expect(render()).toMatch(/<fieldset[^>]*disabled=""[^>]*><legend>Subcategory<\/legend>/);
     const leaf = categories.find((category) => category.children.length === 0)!;
     const html = render(`category=${leaf.id}`);
     expect(html).toContain("No subcategories");
-    expect(html.match(/disabled=""/g)).toHaveLength(2);
+    expect(html).toMatch(/<fieldset[^>]*disabled=""[^>]*><legend>Subcategory<\/legend>/);
   });
 
   it("preserves URL category selections during loading without claiming they are unavailable", () => {

@@ -44,7 +44,7 @@ I used Codex to speed up setup and implementation, explore edge cases in the sup
 
 Initial setup verified a clean `npm ci` and development-page rendering in a browser.
 
-Passes 268 tests (16 mock route-handler tests, 33 catalog normalization tests, 63 pricing tests, 56 URL/provider tests, 29 loading/results/card tests, 18 type/location filter tests, 22 category/control tests, 22 search/provider tests, and 9 draft/sidebar tests), linting, standalone type checking, and the production build. HTTP checks confirmed exact fixture responses, the default delay, forced failures, successful retries, invalid delay handling, and unsupported-method responses.
+Passes 280 tests covering mock endpoints, catalog normalization, pricing, URL state, provider results, filter controls, search, mobile drafts, and currency-scoped price ranges, linting, standalone type checking, and the production build. HTTP checks confirmed exact fixture responses, the default delay, forced failures, successful retries, invalid delay handling, and unsupported-method responses.
 
 Next.js supports ESLint 10, but some bundled plugins still declare older peer ranges; npm can report peer dependency warnings during installation. Linting was verified with this configuration; see the [Next.js ESLint documentation](https://nextjs.org/docs/app/api-reference/config/eslint).
 
@@ -147,3 +147,7 @@ The Providers section offers a separate name search and checkbox multi-select. T
 Above 760 px, search and all filters sit in a sticky left sidebar with independent scrolling. Its maximum height tracks the space below the heading and updates on page scrolling and resizing, so the last filter is reachable even while the page remains at the top. Results appear alongside it immediately. Provider cards use two columns on wide screens and one column on smaller desktop/tablet screens.
 
 At 760 px and below, a compact sticky Filters button opens a drawer from the left. It starts from the applied URL selections. Editing controls, including search, changes a local draft and previews the matching service count without changing the URL or background results. Show N services applies the whole draft together and resets the page. Cancel, Close, Escape, or a backdrop click discards edits; reopening starts from the current applied selections.
+
+## Currency and final-price filters
+
+The Price section supports All currencies, THB, NPR, and INR. A currency selection limits results to that currency; amounts are never converted or compared across currencies. Range inputs are disabled until a currency is selected. Changing currency clears the previous bounds, and Clear range removes both bounds while retaining the currency.

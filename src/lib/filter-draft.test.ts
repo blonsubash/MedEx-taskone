@@ -69,6 +69,16 @@ describe("mobile filter drafts", () => {
     expect(original.toString()).toBe("provider=48&page=4&note=keep");
   });
 
+  it("previews scoped price ranges and clears them when the draft currency changes", () => {
+    const applied = parse("currency=THB&max=5000&page=3");
+    let draft = updateFilterDraft(createFilterDraft(applied), { minPrice: "2000", maxPrice: "2100" }, categories);
+    expect(draft).toMatchObject({ currency: "THB", minPrice: "2000", maxPrice: "2100", page: 1 });
+    expect(filterServices(entries, draft).every(({ service }) => service.provider.currency === "THB")).toBe(true);
+    draft = updateFilterDraft(draft, { currency: "NPR" }, categories);
+    expect(draft).toMatchObject({ currency: "NPR", minPrice: null, maxPrice: null });
+    expect(applied).toMatchObject({ currency: "THB", minPrice: null, maxPrice: "5000", page: 3 });
+  });
+
   it("starts fresh from current applied selections when a discarded draft is reopened", () => {
     const applied = parse("provider=48&type=lab_test");
     const discarded = updateFilterDraft(createFilterDraft(applied), { homeTest: true }, categories);

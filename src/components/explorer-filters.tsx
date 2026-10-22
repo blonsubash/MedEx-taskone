@@ -1,5 +1,6 @@
 "use client";
 
+import { PriceFilter } from "./price-filter";
 import { ProviderFilter } from "./provider-filter";
 
 import { resolveCategoryState } from "@/lib/catalog/category-state";
@@ -124,6 +125,7 @@ export function ExplorerFilters({ state, update, locations, categories, provider
             : "Choose a category to see its subcategories."}</p>
         </fieldset>
       </div>
+      <PriceFilter state={state} update={update} ready={ready} />
       <ProviderFilter providers={providers} selectedIds={state.providerIds} update={update} ready={ready} />
     </div>
   );
