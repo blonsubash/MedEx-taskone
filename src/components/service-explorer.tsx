@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 
+import { resolveCategoryState } from "@/lib/catalog/category-state";
+import type { Category } from "@/lib/catalog/types";
 import { getLocationOptions } from "@/lib/catalog/filter-options";
 import type { LocationCountry } from "@/lib/catalog/filter-options";
 import { loadCatalog } from "@/lib/catalog/load";
@@ -15,7 +17,7 @@ import { ProviderCard } from "./provider-card";
 type CatalogState =
   | { status: "loading" }
   | { status: "error" }
-  | { status: "ready"; entries: PricedService[]; locations: LocationCountry[] };
+  | { status: "ready"; entries: PricedService[]; locations: LocationCountry[]; categories: Category[] };
 
 export function ServiceExplorer() {
   const { state, update } = useExplorerState();
@@ -31,6 +33,7 @@ export function ServiceExplorer() {
             status: "ready",
             entries: prepareServices(data.services),
             locations: getLocationOptions(data.providersById.values()),
+            categories: [...data.categoriesById.values()],
           });
         }
       })
@@ -40,16 +43,32 @@ export function ServiceExplorer() {
     return () => controller.abort();
   }, [attempt]);
 
-  const groups = useMemo(
-    () => catalog.status === "ready" ? getProviderGroups(catalog.entries, state) : [],
+  const effectiveState = useMemo(
+    () => catalog.status === "ready" ? resolveCategoryState(state, catalog.categories) : state,
     [catalog, state],
+  );
+
+  useEffect(() => {
+    if (catalog.status !== "ready") return;
+    // Read the latest URL so a pending repair cannot overwrite a newer navigation.
+    const params = new URLSearchParams(window.location.search);
+    const resolved = resolveCategoryState(parseExplorerState(params), catalog.categories);
+    if (params.get("category") !== resolved.categoryId || params.get("subcategory") !== resolved.subcategoryId) {
+      update({ categoryId: resolved.categoryId, subcategoryId: resolved.subcategoryId }, "replace");
+    }
+  }, [catalog, state, update]);
+
+  const groups = useMemo(
+    () => catalog.status === "ready" ? getProviderGroups(catalog.entries, effectiveState) : [],
+    [catalog, effectiveState],
   );
   const serviceCount = groups.reduce((count, group) => count + group.services.length, 0);
 
   return (
     <section className="explorer" aria-label="Services by provider" aria-busy={catalog.status === "loading"}>
-      <ExplorerFilters state={state} update={update}
+      <ExplorerFilters state={effectiveState} update={update}
         locations={catalog.status === "ready" ? catalog.locations : []}
+        categories={catalog.status === "ready" ? catalog.categories : []}
         ready={catalog.status === "ready"} />
       <div className="results-heading">
         <h2>Explore providers</h2>
@@ -80,7 +99,7 @@ export function ServiceExplorer() {
         </div>
       )}
       {catalog.status === "ready" && (groups.length ? (
-        <div className="provider-grid" key={serializeExplorerState(state).toString()}>
+        <div className="provider-grid" key={serializeExplorerState(effectiveState).toString()}>
           {groups.map((group) => <ProviderCard key={group.provider.id} group={group} />)}
         </div>
       ) : (

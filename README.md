@@ -44,7 +44,7 @@ I used Codex to speed up setup and implementation, explore edge cases in the sup
 
 Initial setup verified a clean `npm ci` and development-page rendering in a browser.
 
-Passes 215 tests (16 mock route-handler tests, 33 catalog normalization tests, 63 pricing tests, 56 URL/provider tests, 29 loading/results/card tests, and 18 filter tests), linting, standalone type checking, and the production build. HTTP checks confirmed exact fixture responses, the default delay, forced failures, successful retries, invalid delay handling, and unsupported-method responses.
+Passes 237 tests (16 mock route-handler tests, 33 catalog normalization tests, 63 pricing tests, 56 URL/provider tests, 29 loading/results/card tests, 18 type/location filter tests, and 22 category/control tests), linting, standalone type checking, and the production build. HTTP checks confirmed exact fixture responses, the default delay, forced failures, successful retries, invalid delay handling, and unsupported-method responses.
 
 Next.js supports ESLint 10, but some bundled plugins still declare older peer ranges; npm can report peer dependency warnings during installation. Linting was verified with this configuration; see the [Next.js ESLint documentation](https://nextjs.org/docs/app/api-reference/config/eslint).
 
@@ -129,3 +129,9 @@ Service types are a multi-select: selecting Health package and Lab test includes
 Controls read directly from the URL. Each change creates a browser-history entry, resets the provider page to 1, and updates results without re-fetching the catalog. Reload, Back, and Forward restore both controls and matching results. Choose All locations or uncheck a selection to remove it.
 
 Location options come from all active providers and remain stable while results narrow. Unknown location IDs from shared links remain selected as “Unavailable location” and can be cleared. Controls are disabled while the catalog loads.
+
+## Categories and subcategories
+
+Categories come from the active category endpoint’s normalized tree and follow the selected service types. Labels include their type so “Ultrasound · Health package” and “Ultrasound · Lab test” stay distinguishable; URLs use IDs. The subcategory control contains only the chosen parent’s active children. It is disabled until a parent with children is selected.
+
+Changing or clearing the parent clears its child. Changing service types clears both category levels if the parent becomes incompatible, in the same URL update. Keeping a compatible type, or clearing all type selections, retains the chosen hierarchy.
