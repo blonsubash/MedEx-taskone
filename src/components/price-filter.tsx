@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 
 import { parseExplorerState } from "@/lib/explorer-state";
 import type { ExplorerPatch, ExplorerState } from "@/lib/explorer-state";
+import { formatFacetCount } from "./facet-count";
+import type { FacetCounts } from "@/lib/catalog/facets";
 import { CURRENCIES } from "@/lib/pricing";
 
 function PriceRange({ state, update }: {
@@ -77,18 +79,21 @@ function PriceRange({ state, update }: {
   </form>;
 }
 
-export function PriceFilter({ state, update, ready }: {
+export function PriceFilter({ state, update, ready, facets }: {
   state: ExplorerState;
   update: (patch: ExplorerPatch) => void;
   ready: boolean;
+  facets: FacetCounts | null;
 }) {
   return <fieldset className="filter-field price-filter" disabled={!ready}>
     <legend>Price</legend>
     <label htmlFor="currency-filter">Currency</label>
     <select id="currency-filter" value={state.currency ?? ""} aria-describedby="price-currency-help"
       onChange={(event) => update({ currency: CURRENCIES.find((currency) => currency === event.target.value) ?? null })}>
-      <option value="">All currencies</option>
-      {CURRENCIES.map((currency) => <option key={currency} value={currency}>{currency}</option>)}
+      <option value="">All currencies ({formatFacetCount(facets?.currencyTotal)})</option>
+      {CURRENCIES.map((currency) => <option key={currency} value={currency}
+        disabled={facets !== null && state.currency !== currency && !facets.currencies.get(currency)}>
+        {currency} ({formatFacetCount(facets ? facets.currencies.get(currency) ?? 0 : undefined)})</option>)}
     </select>
     <p className="filter-help" id="price-currency-help">{state.currency
       ? `${state.currency} prices only. Changing currency clears the range.`

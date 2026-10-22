@@ -6,7 +6,8 @@ import type { ReactNode, RefObject } from "react";
 import type { LocationCountry, ProviderOption } from "@/lib/catalog/filter-options";
 import type { Category } from "@/lib/catalog/types";
 import { resolveCategoryState } from "@/lib/catalog/category-state";
-import { filterServices } from "@/lib/catalog/results";
+import { getFacetCounts } from "@/lib/catalog/facets";
+import type { FacetCounts } from "@/lib/catalog/facets";
 import type { PricedService } from "@/lib/catalog/results";
 import { serializeExplorerState } from "@/lib/explorer-state";
 import type { ExplorerPatch, ExplorerState } from "@/lib/explorer-state";
@@ -33,15 +34,17 @@ interface SidebarProps {
   ready: boolean;
 }
 
-function FilterControls({ state, update, locations, categories, providers, ready, draft = false }: SidebarProps & { draft?: boolean }) {
+type FilterControlProps = SidebarProps & { facets: FacetCounts | null };
+
+function FilterControls({ state, update, locations, categories, providers, ready, facets, draft = false }: FilterControlProps & { draft?: boolean }) {
   return <>
     <CatalogSearch query={state.query} update={update} immediate={draft} />
     <ExplorerFilters state={state} update={update} locations={locations}
-      categories={categories} providers={providers} ready={ready} />
+      categories={categories} providers={providers} ready={ready} facets={facets} />
   </>;
 }
 
-function DesktopFilters(props: SidebarProps) {
+function DesktopFilters(props: FilterControlProps) {
   const sidebar = useRef<HTMLElement>(null);
 
   useLayoutEffect(() => {
@@ -170,12 +173,13 @@ function ResponsiveFilters({ mobile, ...props }: SidebarProps & { mobile: boolea
   }, [props.categories]);
   const effectiveDraft = useMemo(() => draft ? resolveCategoryState(draft, props.categories) : null,
     [draft, props.categories]);
-  const count = useMemo(() => effectiveDraft && props.ready ? filterServices(props.entries, effectiveDraft).length : 0,
-    [effectiveDraft, props.entries, props.ready]);
+  const facetState = mobile ? effectiveDraft : props.state;
+  const facets = useMemo(() => props.ready && facetState ? getFacetCounts(props.entries, facetState) : null,
+    [facetState, props.entries, props.ready]);
   const appliedKey = serializeExplorerState(props.state).toString();
 
   return <>
-    {!mobile && <DesktopFilters {...props} />}
+    {!mobile && <DesktopFilters {...props} facets={facets} />}
     <div className="mobile-filter-toolbar">
       <button ref={trigger} type="button" className="filter-trigger" aria-haspopup="dialog"
         aria-expanded={draft !== null} aria-controls={draft ? "mobile-filters" : undefined} disabled={!props.ready}
@@ -183,12 +187,12 @@ function ResponsiveFilters({ mobile, ...props }: SidebarProps & { mobile: boolea
         <span aria-hidden="true">☰</span> Filters
       </button>
     </div>
-    {mobile && effectiveDraft && <FilterDrawer count={count} ready={props.ready} cancel={cancel}
+    {mobile && effectiveDraft && <FilterDrawer count={facets?.total ?? 0} ready={props.ready} cancel={cancel}
       trigger={trigger} baseline={baseline} appliedKey={appliedKey} apply={() => {
         props.update({ ...effectiveDraft, page: 1 });
         cancel();
       }}>
-      <FilterControls {...props} state={effectiveDraft} update={updateDraft} draft />
+      <FilterControls {...props} state={effectiveDraft} update={updateDraft} facets={facets} draft />
     </FilterDrawer>}
   </>;
 }

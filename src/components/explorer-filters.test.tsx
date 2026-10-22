@@ -2,17 +2,23 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 
 import fixture from "../../data/task1-service-explorer.json";
+import { getFacetCounts } from "@/lib/catalog/facets";
+import { prepareServices } from "@/lib/catalog/results";
 import { normalizeCatalog } from "@/lib/catalog/normalize";
 import { resolveCategoryState } from "@/lib/catalog/category-state";
 import { parseExplorerState } from "@/lib/explorer-state";
 import { ExplorerFilters } from "./explorer-filters";
 
-const categories = [...normalizeCatalog(fixture).categoriesById.values()];
+const catalog = normalizeCatalog(fixture);
+const categories = [...catalog.categoriesById.values()];
+const entries = prepareServices(catalog.services);
 const locations = [{ id: 1, name: "Thailand", cities: [{ id: "bangkok", name: "Bangkok" }] }];
 function render(query = "", ready = true) {
-  return renderToStaticMarkup(<ExplorerFilters state={ready ? resolveCategoryState(parseExplorerState(new URLSearchParams(query)), categories)
-    : parseExplorerState(new URLSearchParams(query))}
-    update={vi.fn()} locations={ready ? locations : []} categories={ready ? categories : []} providers={[]} ready={ready} />);
+  const state = ready ? resolveCategoryState(parseExplorerState(new URLSearchParams(query)), categories)
+    : parseExplorerState(new URLSearchParams(query));
+  return renderToStaticMarkup(<ExplorerFilters state={state}
+    update={vi.fn()} locations={ready ? locations : []} categories={ready ? categories : []} providers={[]} ready={ready}
+    facets={ready ? getFacetCounts(entries, state) : null} />);
 }
 
 describe("ExplorerFilters", () => {
@@ -62,11 +68,11 @@ describe("ExplorerFilters", () => {
     expect(html).not.toContain("Seasonal Offers");
   });
 
-  it("shows only categories compatible with the selected service types", () => {
+  it("keeps incompatible categories visible with zero counts and disabled", () => {
     const html = render("type=lab_test");
     for (const category of categories) {
       if (category.type === "lab_test") expect(html).toContain(`value="${category.id}"`);
-      else expect(html).not.toContain(`value="${category.id}"`);
+      else expect(html).toMatch(new RegExp(`<option(?=[^>]*value="${category.id}")(?=[^>]*disabled="")[^>]*>[^<]*\\(0\\)</option>`));
     }
   });
 
@@ -99,4 +105,27 @@ describe("ExplorerFilters", () => {
     expect(html).toContain("Selected subcategory");
   });
 
+  it("keeps selected zero-count choices removable while disabling unselected zero choices", () => {
+    const parent = categories.find((option) => option.type === "package" && option.children.length)!;
+    const html = render(`q=no-matching-service-zzzz&type=package&category=${parent.id}&subcategory=${parent.children[0].id}&city=bangkok&home=true&currency=THB`);
+    const typeTag = (value: string) => html.match(new RegExp(`<input(?=[^>]*name="type")(?=[^>]*value="${value}")[^>]*>`))![0];
+    const optionTag = (value: string) => html.match(new RegExp(`<option(?=[^>]*value="${value}")[^>]*>`))![0];
+    expect(typeTag("package")).toContain('checked=""');
+    expect(typeTag("package")).not.toContain("disabled");
+    expect(typeTag("lab_test")).toContain('disabled=""');
+    for (const value of [parent.id, parent.children[0].id, "city:bangkok", "THB"]) {
+      expect(optionTag(value)).toContain('selected=""');
+      expect(optionTag(value)).not.toContain("disabled");
+    }
+    expect(optionTag("country:1")).toContain('disabled=""');
+    expect(optionTag("NPR")).toContain('disabled=""');
+    expect(html.match(/<label class="home-option"><input[^>]*>/)![0]).not.toContain("disabled");
+    expect(html).toContain("matching services");
+  });
+
+  it("uses loading placeholders rather than announcing zero counts before data arrives", () => {
+    const html = render("", false);
+    expect(html).toContain("(—)");
+    expect(html).not.toContain("(0)");
+  });
 });

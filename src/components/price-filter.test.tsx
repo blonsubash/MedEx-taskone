@@ -1,12 +1,19 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 
+import { getFacetCounts } from "@/lib/catalog/facets";
+import { prepareServices } from "@/lib/catalog/results";
+import { normalizeCatalog } from "@/lib/catalog/normalize";
+import fixture from "../../data/task1-service-explorer.json";
 import { parseExplorerState } from "@/lib/explorer-state";
 import { PriceFilter } from "./price-filter";
 
-const render = (query = "", ready = true) => renderToStaticMarkup(
-  <PriceFilter state={parseExplorerState(new URLSearchParams(query))} update={vi.fn()} ready={ready} />,
-);
+const entries = prepareServices(normalizeCatalog(fixture).services);
+function render(query = "", ready = true) {
+  const state = parseExplorerState(new URLSearchParams(query));
+  return renderToStaticMarkup(<PriceFilter state={state} update={vi.fn()} ready={ready}
+    facets={ready ? getFacetCounts(entries, state) : null} />);
+}
 
 describe("PriceFilter", () => {
   it("requires an explicit currency before enabling range entry", () => {

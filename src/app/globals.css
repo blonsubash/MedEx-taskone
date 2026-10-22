@@ -350,6 +350,24 @@ select:focus-visible {
   line-height: 1.5;
 }
 
+.facet-help {
+  margin-bottom: 1rem;
+}
+
+.facet-count {
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+.type-option:has(input:disabled),
+.home-option:has(input:disabled),
+.provider-choice:has(input:disabled) {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .filter-field:disabled {
   opacity: 0.65;
 }

@@ -10,7 +10,7 @@ const providers = [
 ];
 function render(query = "", ready = true) {
   return renderToStaticMarkup(<ProviderFilter providers={ready ? providers : []}
-    selectedIds={parseExplorerState(new URLSearchParams(query)).providerIds} ready={ready} update={vi.fn()} />);
+    selectedIds={parseExplorerState(new URLSearchParams(query)).providerIds} ready={ready} update={vi.fn()} counts={ready ? new Map([[46, 44], [48, 53]]) : null} />);
 }
 
 describe("ProviderFilter", () => {
@@ -44,5 +44,17 @@ describe("ProviderFilter", () => {
     expect(html).toContain("Selected provider #48");
     expect(html).toContain('disabled=""');
     expect(html).toContain("Loading providers…");
+  });
+  it("shows provider service counts and leaves selected zero-count providers removable", () => {
+    const html = renderToStaticMarkup(<ProviderFilter providers={providers} selectedIds={[48]}
+      ready update={vi.fn()} counts={new Map([[46, 0], [48, 0]])} />);
+    const selected = html.match(/<input(?=[^>]*value="48")[^>]*>/)![0];
+    const unselected = html.match(/<input(?=[^>]*value="46")[^>]*>/)![0];
+    expect(selected).toContain('checked=""');
+    expect(selected).not.toContain("disabled");
+    expect(unselected).toContain('disabled=""');
+    expect(html).toContain("(0)");
+    expect(render()).toContain("(53)");
+    expect(render()).toContain("(44)");
   });
 });

@@ -1,16 +1,19 @@
 "use client";
 
+import { FacetCount } from "./facet-count";
+
 import { useState } from "react";
 
 import { filterProviderOptions } from "@/lib/catalog/filter-options";
 import type { ProviderOption } from "@/lib/catalog/filter-options";
 import type { ExplorerPatch } from "@/lib/explorer-state";
 
-export function ProviderFilter({ providers, selectedIds, update, ready }: {
+export function ProviderFilter({ providers, selectedIds, update, ready, counts }: {
   providers: ProviderOption[];
   selectedIds: number[];
   update: (patch: ExplorerPatch) => void;
   ready: boolean;
+  counts: Map<number, number> | null;
 }) {
   const [query, setQuery] = useState("");
   const byId = new Map(providers.map((provider) => [provider.id, provider]));
@@ -23,11 +26,12 @@ export function ProviderFilter({ providers, selectedIds, update, ready }: {
     return (
       <li key={provider.id}>
         <label className="provider-choice">
-          <input type="checkbox" checked={selectedIds.includes(provider.id)} onChange={(event) => update({
+          <input type="checkbox" name="provider" value={provider.id}
+            disabled={counts !== null && !selectedIds.includes(provider.id) && !counts.get(provider.id)} checked={selectedIds.includes(provider.id)} onChange={(event) => update({
             providerIds: event.target.checked ? [...selectedIds, provider.id]
               : selectedIds.filter((id) => id !== provider.id),
           })} />
-          <span><span className="provider-choice-name">{provider.name}</span>
+          <span><span className="provider-choice-name">{provider.name} <FacetCount count={counts ? counts.get(provider.id) ?? 0 : undefined} /></span>
             {provider.location && <span className="provider-choice-location">{provider.location}</span>}
           </span>
         </label>

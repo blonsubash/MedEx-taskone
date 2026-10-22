@@ -44,7 +44,7 @@ I used Codex to speed up setup and implementation, explore edge cases in the sup
 
 Initial setup verified a clean `npm ci` and development-page rendering in a browser.
 
-All 316 tests pass, covering mock endpoints, catalog normalization, pricing, URL state, provider results, filter controls, search, mobile drafts, currency-scoped price ranges, sorting, and pagination. Lint, standalone type checking, and the production build also pass. HTTP checks confirmed exact fixture responses, the default delay, forced failures, successful retries, invalid delay handling, and unsupported-method responses.
+All 338 tests pass, covering mock endpoints, catalog normalization, pricing, URL state, provider results, filter controls, search, mobile drafts, currency-scoped price ranges, sorting, pagination, and live facet counts. Lint, standalone type checking, and the production build also pass. HTTP checks confirmed exact fixture responses, the default delay, forced failures, successful retries, invalid delay handling, and unsupported-method responses.
 
 Next.js supports ESLint 10, but some bundled plugins still declare older peer ranges; npm can report peer dependency warnings during installation. Linting was verified with this configuration; see the [Next.js ESLint documentation](https://nextjs.org/docs/app/api-reference/config/eslint).
 
@@ -132,7 +132,7 @@ Location options come from all active providers and remain stable while results 
 
 ## Categories and subcategories
 
-Categories come from the active category endpoint’s normalized tree and follow the selected service types. Labels include their type so “Ultrasound · Health package” and “Ultrasound · Lab test” stay distinguishable; URLs use IDs. The subcategory control contains only the chosen parent’s active children. It is disabled until a parent with children is selected.
+Categories come from the active category endpoint’s normalized tree. All active categories stay visible; incompatible service types have zero counts and cannot be selected. Labels include their type so “Ultrasound · Health package” and “Ultrasound · Lab test” stay distinguishable; URLs use IDs. The subcategory control contains only the chosen parent’s active children. It is disabled until a parent with children is selected.
 
 Changing or clearing the parent clears its child. Changing service types clears both category levels if the parent becomes incompatible, in the same URL update. Keeping a compatible type, or clearing all type selections, retains the chosen hierarchy.
 
@@ -160,3 +160,17 @@ Results support Relevance, Price: low to high, Price: high to low, and Highest r
 - **Price:** ascending ranks a provider by its cheapest matching service; descending uses its most expensive matching service. Rows follow the same direction. Both use exact final prices, with unavailable prices last within each currency. A wellness service uses its displayed lowest qualifying duration's price in both directions, rather than a hidden higher-priced option.
 - **Currencies:** with All currencies selected, price sorting uses labelled sections in THB, NPR, INR order. Other currency codes follow alphabetically with unavailable pricing. Numeric amounts are compared only within the same currency; there is no conversion or overall cross-currency cheapest provider.
 - **Rating:** rated providers appear highest first and unrated providers last, including after a zero rating. Name and ID break rating ties. Services within each card retain relevance ordering, or alphabetical ordering without a query.
+
+## Live facet counts
+
+`getFacetCounts` uses the same `filterServices` matcher as results, before sorting or pagination. Counts measure services, including a wellness service once when any duration qualifies. Search, visibility, exact final-price ranges, and other dimensions continue to apply.
+
+| Facet        | Selection omitted when counting its options                                |
+| ------------ | -------------------------------------------------------------------------- |
+| Service type | All selected types; category/subcategory constraints remain                |
+| Location     | Both city and country                                                      |
+| Availability | Home-test requirement                                                      |
+| Category     | Both category and subcategory                                              |
+| Subcategory  | Selected child; the parent remains                                         |
+| Provider     | All selected providers, so each provider has an independent count          |
+| Currency     | Currency and its dependent price bounds, matching currency-switch behavior |
