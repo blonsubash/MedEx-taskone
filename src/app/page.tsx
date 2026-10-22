@@ -1,8 +1,11 @@
+import { ServiceExplorer } from "@/components/service-explorer";
 import { ExplorerStateProvider } from "@/components/explorer-state-provider";
 import { parseExplorerState, toSearchParams } from "@/lib/explorer-state";
 import type { PageSearchParams } from "@/lib/explorer-state";
 
-export default async function HomePage({ searchParams }: {
+export default async function HomePage({
+  searchParams,
+}: {
   searchParams: Promise<PageSearchParams>;
 }) {
   const initialState = parseExplorerState(toSearchParams(await searchParams));
@@ -19,7 +22,7 @@ export default async function HomePage({ searchParams }: {
           Explore health packages, lab tests, and wellness services from
           healthcare providers.
         </p>
-        <p className="placeholder">Service browsing is coming next.</p>
+        <ServiceExplorer />
       </main>
     </ExplorerStateProvider>
   );

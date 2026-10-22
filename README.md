@@ -36,7 +36,7 @@ For a production preview, run `npm start` after a successful build.
 
 ## AI usage
 
-Codex assisted with the phase breakdown, initial application scaffold, tooling configuration, setup verification, mock endpoint tests, catalog normalization, and their tests.
+Codex assisted with the phase breakdown, initial application scaffold, tooling configuration, setup verification, mock endpoint tests, catalog normalization and their tests.
 
 I used Codex to speed up setup and implementation, explore edge cases in the supplied data, and draft targeted tests. The goal was to work efficiently within the exercise’s time limit while keeping each change small, verifiable, and understandable.
 
@@ -44,7 +44,7 @@ I used Codex to speed up setup and implementation, explore edge cases in the sup
 
 Initial setup verified a clean `npm ci` and development-page rendering in a browser.
 
-Passes 168 tests (16 mock route-handler tests, 33 catalog normalization tests, 63 pricing tests, and 56 URL/provider tests), linting, standalone type checking, and the production build. HTTP checks confirmed exact fixture responses, the default delay, forced failures, successful retries, invalid delay handling, and unsupported-method responses.
+Passes 197 tests (16 mock route-handler tests, 33 catalog normalization tests, 63 pricing tests, 56 URL/provider tests, and 29 loading/results/card tests), linting, standalone type checking, and the production build. HTTP checks confirmed exact fixture responses, the default delay, forced failures, successful retries, invalid delay handling, and unsupported-method responses.
 
 Next.js supports ESLint 10, but some bundled plugins still declare older peer ranges; npm can report peer dependency warnings during installation. Linting was verified with this configuration; see the [Next.js ESLint documentation](https://nextjs.org/docs/app/api-reference/config/eslint).
 
@@ -66,7 +66,7 @@ The original fixture is stored unchanged in `data/task1-service-explorer.json`. 
 
 These endpoints preserve every source field and value, including inactive records, decimal strings, nulls, and inconsistent titles. Despite its name, `/api/category/active` returns the supplied category collection unchanged.
 
-The fixture is imported only by the mock API module (and its tests). A `server-only` boundary prevents accidental imports into client components. Components will fetch these endpoints when browsing is implemented.
+The fixture is imported only by the mock API module (and its tests). A `server-only` boundary prevents accidental imports into client components. The explorer fetches all three endpoints concurrently, then normalizes the complete catalog. It shows no partial provider results if a collection fails and offers a retry. Requests are aborted when the explorer unmounts.
 
 ### Latency and failure controls
 
@@ -115,3 +115,9 @@ Vitest exercises the actual route handlers with fake timers: exact response data
 | `page`                    | Positive safe integer                                      | 1              |
 
 For example: `/?q=checkup&type=package&city=3d77683b-7047-4874-8b9c-6ab04accd89d&currency=THB&max=5000&sort=price-asc&page=2`.
+
+## Provider results
+
+The explorer displays **2,853 visible services across 64 providers**. There are 65 active provider records, but one has no visible services. Cards show each provider’s location, rating and review count, or “No ratings yet”. Each card initially renders at most three matching services; “View all N services” opens all matching services in an independently scrollable area inside that card, preserving its three-service preview height. The provider header and collapse control stay in place. “Show fewer services” collapses the card, and changing URL filters resets expanded cards.
+
+Prices include the calculated service charge, show explicit currency codes, and strike through the original amount when a discount applies. Zero prices are labelled “Free”; missing or invalid prices say “Price unavailable”. Wellness services show “From” with the duration of the cheapest valid option. Optional home collection fees are shown separately from the service price.
