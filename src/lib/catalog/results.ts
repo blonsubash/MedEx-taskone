@@ -44,8 +44,8 @@ function matchingPricing(pricing: ServicePricing, state: ExplorerState): Service
   return startingOption === null ? null : { ...pricing, startingOption };
 }
 
-export function getProviderGroups(entries: PricedService[], state: ExplorerState): ProviderGroup[] {
-  const groups = new Map<number, ProviderGroup>();
+export function filterServices(entries: PricedService[], state: ExplorerState): PricedService[] {
+  const matches: PricedService[] = [];
   const query = state.query.toLowerCase();
 
   for (const entry of entries) {
@@ -63,12 +63,21 @@ export function getProviderGroups(entries: PricedService[], state: ExplorerState
     const pricing = matchingPricing(entry.pricing, state);
     if (pricing === null) continue;
 
+    matches.push({ service, pricing });
+  }
+  return matches;
+}
+
+export function getProviderGroups(entries: PricedService[], state: ExplorerState): ProviderGroup[] {
+  const groups = new Map<number, ProviderGroup>();
+  for (const entry of filterServices(entries, state)) {
+    const provider = entry.service.provider;
     let group = groups.get(provider.id);
     if (!group) {
       group = { provider, services: [] };
       groups.set(provider.id, group);
     }
-    group.services.push({ service, pricing });
+    group.services.push(entry);
   }
 
   // Keep source order until explicit provider ranking and pagination are added.

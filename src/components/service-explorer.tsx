@@ -2,17 +2,20 @@
 
 import { useEffect, useMemo, useState } from "react";
 
+import { getLocationOptions } from "@/lib/catalog/filter-options";
+import type { LocationCountry } from "@/lib/catalog/filter-options";
 import { loadCatalog } from "@/lib/catalog/load";
 import { getProviderGroups, prepareServices } from "@/lib/catalog/results";
 import type { PricedService } from "@/lib/catalog/results";
 import { parseExplorerState, serializeExplorerState } from "@/lib/explorer-state";
 import { useExplorerState } from "./explorer-state-provider";
+import { ExplorerFilters } from "./explorer-filters";
 import { ProviderCard } from "./provider-card";
 
 type CatalogState =
   | { status: "loading" }
   | { status: "error" }
-  | { status: "ready"; entries: PricedService[] };
+  | { status: "ready"; entries: PricedService[]; locations: LocationCountry[] };
 
 export function ServiceExplorer() {
   const { state, update } = useExplorerState();
@@ -24,7 +27,11 @@ export function ServiceExplorer() {
     loadCatalog(controller.signal)
       .then((data) => {
         if (!controller.signal.aborted) {
-          setCatalog({ status: "ready", entries: prepareServices(data.services) });
+          setCatalog({
+            status: "ready",
+            entries: prepareServices(data.services),
+            locations: getLocationOptions(data.providersById.values()),
+          });
         }
       })
       .catch(() => {
@@ -41,6 +48,9 @@ export function ServiceExplorer() {
 
   return (
     <section className="explorer" aria-label="Services by provider" aria-busy={catalog.status === "loading"}>
+      <ExplorerFilters state={state} update={update}
+        locations={catalog.status === "ready" ? catalog.locations : []}
+        ready={catalog.status === "ready"} />
       <div className="results-heading">
         <h2>Explore providers</h2>
         <p className="results-count" role="status">

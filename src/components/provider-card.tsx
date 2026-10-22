@@ -3,17 +3,9 @@
 import { useState } from "react";
 
 import type { PricedService, ProviderGroup } from "@/lib/catalog/results";
-import type { ServiceType } from "@/lib/catalog/types";
+import { SERVICE_TYPE_LABELS } from "@/lib/catalog/filter-options";
 import { formatMoney } from "@/lib/pricing";
 import type { PriceResult } from "@/lib/pricing";
-
-const typeLabels: Record<ServiceType, string> = {
-  package: "Health package",
-  lab_test: "Lab test",
-  wellness: "Wellness",
-  service: "Healthcare service",
-  insurance: "Insurance",
-};
 
 function Price({ price, from = false }: { price: PriceResult; from?: boolean }) {
   if (price.status === "unavailable") {
@@ -42,7 +34,7 @@ function ServiceRow({ entry }: { entry: PricedService }) {
   return (
     <li className="service-row">
       <div className="service-details">
-        <p className="service-type">{typeLabels[service.type]}</p>
+        <p className="service-type">{SERVICE_TYPE_LABELS[service.type]}</p>
         <h3>{service.title}</h3>
         {service.category && <p className="service-category">{service.category.title}</p>}
         {service.testAtHome && <span className="home-badge">Home test available</span>}

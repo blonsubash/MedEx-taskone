@@ -36,7 +36,7 @@ For a production preview, run `npm start` after a successful build.
 
 ## AI usage
 
-Codex assisted with the phase breakdown, initial application scaffold, tooling configuration, setup verification, mock endpoint tests, catalog normalization and their tests.
+Codex assisted with the phase breakdown, initial application scaffold, tooling configuration, setup verification, mock endpoint tests, catalog normalization, and their tests.
 
 I used Codex to speed up setup and implementation, explore edge cases in the supplied data, and draft targeted tests. The goal was to work efficiently within the exercise’s time limit while keeping each change small, verifiable, and understandable.
 
@@ -44,7 +44,7 @@ I used Codex to speed up setup and implementation, explore edge cases in the sup
 
 Initial setup verified a clean `npm ci` and development-page rendering in a browser.
 
-Passes 197 tests (16 mock route-handler tests, 33 catalog normalization tests, 63 pricing tests, 56 URL/provider tests, and 29 loading/results/card tests), linting, standalone type checking, and the production build. HTTP checks confirmed exact fixture responses, the default delay, forced failures, successful retries, invalid delay handling, and unsupported-method responses.
+Passes 215 tests (16 mock route-handler tests, 33 catalog normalization tests, 63 pricing tests, 56 URL/provider tests, 29 loading/results/card tests, and 18 filter tests), linting, standalone type checking, and the production build. HTTP checks confirmed exact fixture responses, the default delay, forced failures, successful retries, invalid delay handling, and unsupported-method responses.
 
 Next.js supports ESLint 10, but some bundled plugins still declare older peer ranges; npm can report peer dependency warnings during installation. Linting was verified with this configuration; see the [Next.js ESLint documentation](https://nextjs.org/docs/app/api-reference/config/eslint).
 
@@ -121,3 +121,11 @@ For example: `/?q=checkup&type=package&city=3d77683b-7047-4874-8b9c-6ab04accd89d
 The explorer displays **2,853 visible services across 64 providers**. There are 65 active provider records, but one has no visible services. Cards show each provider’s location, rating and review count, or “No ratings yet”. Each card initially renders at most three matching services; “View all N services” opens all matching services in an independently scrollable area inside that card, preserving its three-service preview height. The provider header and collapse control stay in place. “Show fewer services” collapses the card, and changing URL filters resets expanded cards.
 
 Prices include the calculated service charge, show explicit currency codes, and strike through the original amount when a discount applies. Zero prices are labelled “Free”; missing or invalid prices say “Price unavailable”. Wellness services show “From” with the duration of the cheapest valid option. Optional home collection fees are shown separately from the service price.
+
+## Type, location, and home-test filters
+
+Service types are a multi-select: selecting Health package and Lab test includes either type. Leaving all types unchecked includes every type. Location selects one country or city by ID; choosing a country includes all its cities. Home test available requires the service’s availability flag, independent of its optional collection fee. These dimensions combine with AND and retain other URL filters.
+
+Controls read directly from the URL. Each change creates a browser-history entry, resets the provider page to 1, and updates results without re-fetching the catalog. Reload, Back, and Forward restore both controls and matching results. Choose All locations or uncheck a selection to remove it.
+
+Location options come from all active providers and remain stable while results narrow. Unknown location IDs from shared links remain selected as “Unavailable location” and can be cleared. Controls are disabled while the catalog loads.
