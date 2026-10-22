@@ -36,7 +36,7 @@ For a production preview, run `npm start` after a successful build.
 
 ## AI usage
 
-Codex assisted with the phase breakdown, initial application scaffold, tooling configuration, setup verification, mock endpoint tests, catalog normalization and their tests.
+Codex assisted with the phase breakdown, initial application scaffold, tooling configuration, setup verification, mock endpoint tests, catalog normalization, and their tests.
 
 I used Codex to speed up setup and implementation, explore edge cases in the supplied data, and draft targeted tests. The goal was to work efficiently within the exercise’s time limit while keeping each change small, verifiable, and understandable.
 
@@ -44,7 +44,7 @@ I used Codex to speed up setup and implementation, explore edge cases in the sup
 
 Initial setup verified a clean `npm ci` and development-page rendering in a browser.
 
-Passes 112 tests (16 mock route-handler tests, 33 catalog normalization tests, and 63 pricing tests), linting, standalone type checking, and the production build. HTTP checks confirmed exact fixture responses, the default delay, forced failures, successful retries, invalid delay handling, and unsupported-method responses.
+Passes 168 tests (16 mock route-handler tests, 33 catalog normalization tests, 63 pricing tests, and 56 URL/provider tests), linting, standalone type checking, and the production build. HTTP checks confirmed exact fixture responses, the default delay, forced failures, successful retries, invalid delay handling, and unsupported-method responses.
 
 Next.js supports ESLint 10, but some bundled plugins still declare older peer ranges; npm can report peer dependency warnings during installation. Linting was verified with this configuration; see the [Next.js ESLint documentation](https://nextjs.org/docs/app/api-reference/config/eslint).
 
@@ -96,3 +96,22 @@ Vitest exercises the actual route handlers with fake timers: exact response data
 ## Price calculations
 
 `src/lib/pricing.ts` contains `calculatePrice`, `getServicePricing`, and `formatMoney`. These functions consume the normalized model.
+
+## URL state
+
+`src/lib/explorer-state.ts` defines the shared parser, serializer, and update rules. `src/components/explorer-state-provider.tsx`
+
+| Parameter                 | Meaning                                                    | Default        |
+| ------------------------- | ---------------------------------------------------------- | -------------- |
+| `q`                       | Free-text search; whitespace is normalized, case preserved | Empty          |
+| `type`                    | Repeated service type, e.g. `type=package&type=lab_test`   | All types      |
+| `category`, `subcategory` | Category and child IDs                                     | None           |
+| `provider`                | Repeated positive provider ID                              | All providers  |
+| `city` or `country`       | City ID or positive country ID                             | All locations  |
+| `currency`                | THB, NPR, or INR                                           | All currencies |
+| `min`, `max`              | Non-negative decimal price bounds within that currency     | No bounds      |
+| `home`                    | `true` requires home-test availability                     | False          |
+| `sort`                    | `relevance`, `price-asc`, `price-desc`, or `rating`        | Relevance      |
+| `page`                    | Positive safe integer                                      | 1              |
+
+For example: `/?q=checkup&type=package&city=3d77683b-7047-4874-8b9c-6ab04accd89d&currency=THB&max=5000&sort=price-asc&page=2`.

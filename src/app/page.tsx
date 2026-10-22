@@ -1,6 +1,13 @@
-export default function HomePage() {
+import { ExplorerStateProvider } from "@/components/explorer-state-provider";
+import { parseExplorerState, toSearchParams } from "@/lib/explorer-state";
+import type { PageSearchParams } from "@/lib/explorer-state";
+
+export default async function HomePage({ searchParams }: {
+  searchParams: Promise<PageSearchParams>;
+}) {
+  const initialState = parseExplorerState(toSearchParams(await searchParams));
   return (
-    <>
+    <ExplorerStateProvider initialState={initialState}>
       <header className="site-header">
         <span className="brand">MedEx</span>
         <span className="site-label">Service Explorer</span>
@@ -14,6 +21,6 @@ export default function HomePage() {
         </p>
         <p className="placeholder">Service browsing is coming next.</p>
       </main>
-    </>
+    </ExplorerStateProvider>
   );
 }
