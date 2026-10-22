@@ -1,8 +1,10 @@
 "use client";
 
+import { ProviderFilter } from "./provider-filter";
+
 import { resolveCategoryState } from "@/lib/catalog/category-state";
 import { SERVICE_TYPE_LABELS } from "@/lib/catalog/filter-options";
-import type { LocationCountry } from "@/lib/catalog/filter-options";
+import type { LocationCountry, ProviderOption } from "@/lib/catalog/filter-options";
 import { SERVICE_TYPES } from "@/lib/catalog/types";
 import type { Category } from "@/lib/catalog/types";
 import type { ExplorerPatch, ExplorerState, LocationFilter } from "@/lib/explorer-state";
@@ -12,10 +14,11 @@ type Props = {
   update: (patch: ExplorerPatch) => void;
   locations: LocationCountry[];
   categories: Category[];
+  providers: ProviderOption[];
   ready: boolean;
 };
 
-export function ExplorerFilters({ state, update, locations, categories, ready }: Props) {
+export function ExplorerFilters({ state, update, locations, categories, providers, ready }: Props) {
   const locationValue = state.location ? `${state.location.kind}:${state.location.id}` : "";
   const locationChoices = new Map<string, LocationFilter>();
   for (const country of locations) {
@@ -121,6 +124,7 @@ export function ExplorerFilters({ state, update, locations, categories, ready }:
             : "Choose a category to see its subcategories."}</p>
         </fieldset>
       </div>
+      <ProviderFilter providers={providers} selectedIds={state.providerIds} update={update} ready={ready} />
     </div>
   );
 }

@@ -12,7 +12,7 @@ const locations = [{ id: 1, name: "Thailand", cities: [{ id: "bangkok", name: "B
 function render(query = "", ready = true) {
   return renderToStaticMarkup(<ExplorerFilters state={ready ? resolveCategoryState(parseExplorerState(new URLSearchParams(query)), categories)
     : parseExplorerState(new URLSearchParams(query))}
-    update={vi.fn()} locations={ready ? locations : []} categories={ready ? categories : []} ready={ready} />);
+    update={vi.fn()} locations={ready ? locations : []} categories={ready ? categories : []} providers={[]} ready={ready} />);
 }
 
 describe("ExplorerFilters", () => {
@@ -43,7 +43,7 @@ describe("ExplorerFilters", () => {
 
   it("disables controls until the catalog is ready without losing URL selections", () => {
     const html = render("type=wellness&city=bangkok&home=true", false);
-    expect(html.match(/disabled=""/g)).toHaveLength(5);
+    expect(html.match(/disabled=""/g)).toHaveLength(7);
     expect(html.match(/checked=""/g)).toHaveLength(2);
     expect(html).toContain('value="city:bangkok" selected=""');
     expect(html).toContain("Selected location");
@@ -81,11 +81,11 @@ describe("ExplorerFilters", () => {
 
   it("disables the child control until a parent with children is selected", () => {
     expect(render()).toContain("Select a category first");
-    expect(render().match(/disabled=""/g)).toHaveLength(1);
+    expect(render().match(/disabled=""/g)).toHaveLength(2);
     const leaf = categories.find((category) => category.children.length === 0)!;
     const html = render(`category=${leaf.id}`);
     expect(html).toContain("No subcategories");
-    expect(html.match(/disabled=""/g)).toHaveLength(1);
+    expect(html.match(/disabled=""/g)).toHaveLength(2);
   });
 
   it("preserves URL category selections during loading without claiming they are unavailable", () => {

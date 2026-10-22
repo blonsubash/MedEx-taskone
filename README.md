@@ -44,7 +44,7 @@ I used Codex to speed up setup and implementation, explore edge cases in the sup
 
 Initial setup verified a clean `npm ci` and development-page rendering in a browser.
 
-Passes 237 tests (16 mock route-handler tests, 33 catalog normalization tests, 63 pricing tests, 56 URL/provider tests, 29 loading/results/card tests, 18 type/location filter tests, and 22 category/control tests), linting, standalone type checking, and the production build. HTTP checks confirmed exact fixture responses, the default delay, forced failures, successful retries, invalid delay handling, and unsupported-method responses.
+Passes 268 tests (16 mock route-handler tests, 33 catalog normalization tests, 63 pricing tests, 56 URL/provider tests, 29 loading/results/card tests, 18 type/location filter tests, 22 category/control tests, 22 search/provider tests, and 9 draft/sidebar tests), linting, standalone type checking, and the production build. HTTP checks confirmed exact fixture responses, the default delay, forced failures, successful retries, invalid delay handling, and unsupported-method responses.
 
 Next.js supports ESLint 10, but some bundled plugins still declare older peer ranges; npm can report peer dependency warnings during installation. Linting was verified with this configuration; see the [Next.js ESLint documentation](https://nextjs.org/docs/app/api-reference/config/eslint).
 
@@ -135,3 +135,15 @@ Location options come from all active providers and remain stable while results 
 Categories come from the active category endpoint’s normalized tree and follow the selected service types. Labels include their type so “Ultrasound · Health package” and “Ultrasound · Lab test” stay distinguishable; URLs use IDs. The subcategory control contains only the chosen parent’s active children. It is disabled until a parent with children is selected.
 
 Changing or clearing the parent clears its child. Changing service types clears both category levels if the parent becomes incompatible, in the same URL update. Keeping a compatible type, or clearing all type selections, retains the chosen hierarchy.
+
+## Catalog search and providers
+
+Catalog search matches service titles, provider names, and category/subcategory labels using case-insensitive substrings. Matching collapses repeated whitespace using the same rules as the URL parser. Typing applies after a 300 ms pause; Enter or Search applies immediately. The native input keeps draft spacing and focus while the URL stores the normalized applied query. Pending typing is cancelled on Back/Forward, reset, or unmount.
+
+The Providers section offers a separate name search and checkbox multi-select. This local search only narrows the option list; it does not change `q`, selected providers, or catalog results. Options come from all active providers and are sorted by name. Selected providers stay pinned and removable even when their names do not match the option search. Unavailable IDs from shared links remain visible as selected placeholders so users can remove them.
+
+## Responsive filter layout
+
+Above 760 px, search and all filters sit in a sticky left sidebar with independent scrolling. Its maximum height tracks the space below the heading and updates on page scrolling and resizing, so the last filter is reachable even while the page remains at the top. Results appear alongside it immediately. Provider cards use two columns on wide screens and one column on smaller desktop/tablet screens.
+
+At 760 px and below, a compact sticky Filters button opens a drawer from the left. It starts from the applied URL selections. Editing controls, including search, changes a local draft and previews the matching service count without changing the URL or background results. Show N services applies the whole draft together and resets the page. Cancel, Close, Escape, or a backdrop click discards edits; reopening starts from the current applied selections.

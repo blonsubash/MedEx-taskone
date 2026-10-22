@@ -1,3 +1,5 @@
+import { normalizeSearchQuery } from "@/lib/search";
+
 import type { City, Provider, ServiceType } from "./types";
 
 export const SERVICE_TYPE_LABELS: Record<ServiceType, string> = {
@@ -35,4 +37,23 @@ export function getLocationOptions(providers: Iterable<Provider>): LocationCount
     country.cities.sort((a, b) => a.name.localeCompare(b.name, "en") || a.id.localeCompare(b.id, "en"));
   }
   return sorted;
+}
+
+export interface ProviderOption {
+  id: number;
+  name: string;
+  location: string;
+}
+
+export function getProviderOptions(providers: Iterable<Provider>): ProviderOption[] {
+  return [...providers].map((provider) => ({
+    id: provider.id,
+    name: provider.name,
+    location: `${provider.city.name}, ${provider.country.name}`,
+  })).sort((a, b) => a.name.localeCompare(b.name, "en") || a.id - b.id);
+}
+
+export function filterProviderOptions(providers: ProviderOption[], query: string): ProviderOption[] {
+  const needle = normalizeSearchQuery(query).toLowerCase();
+  return providers.filter((provider) => normalizeSearchQuery(provider.name).toLowerCase().includes(needle));
 }

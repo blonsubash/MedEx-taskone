@@ -1,5 +1,7 @@
 import Big from "big.js";
 
+import { normalizeSearchQuery } from "./search";
+
 import { SERVICE_TYPES } from "./catalog/types";
 import type { ServiceType } from "./catalog/types";
 import { CURRENCIES } from "./pricing";
@@ -80,7 +82,7 @@ export function parseExplorerState(params: SearchParams): ExplorerState {
   }
 
   return {
-    query: (params.get("q") ?? "").trim().replace(/\s+/g, " "),
+    query: normalizeSearchQuery(params.get("q") ?? ""),
     types: SERVICE_TYPES.filter((type) => selectedTypes.has(type)),
     categoryId,
     subcategoryId: categoryId === null ? null : nonEmpty(params.get("subcategory")),
