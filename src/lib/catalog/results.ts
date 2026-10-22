@@ -80,6 +80,6 @@ export function getProviderGroups(entries: PricedService[], state: ExplorerState
     group.services.push(entry);
   }
 
-  // Keep source order until explicit provider ranking and pagination are added.
+  // Ranking and pagination operate on these complete matching groups.
   return [...groups.values()];
 }

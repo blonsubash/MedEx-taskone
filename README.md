@@ -44,7 +44,7 @@ I used Codex to speed up setup and implementation, explore edge cases in the sup
 
 Initial setup verified a clean `npm ci` and development-page rendering in a browser.
 
-Passes 280 tests covering mock endpoints, catalog normalization, pricing, URL state, provider results, filter controls, search, mobile drafts, and currency-scoped price ranges, linting, standalone type checking, and the production build. HTTP checks confirmed exact fixture responses, the default delay, forced failures, successful retries, invalid delay handling, and unsupported-method responses.
+All 316 tests pass, covering mock endpoints, catalog normalization, pricing, URL state, provider results, filter controls, search, mobile drafts, currency-scoped price ranges, sorting, and pagination. Lint, standalone type checking, and the production build also pass. HTTP checks confirmed exact fixture responses, the default delay, forced failures, successful retries, invalid delay handling, and unsupported-method responses.
 
 Next.js supports ESLint 10, but some bundled plugins still declare older peer ranges; npm can report peer dependency warnings during installation. Linting was verified with this configuration; see the [Next.js ESLint documentation](https://nextjs.org/docs/app/api-reference/config/eslint).
 
@@ -151,3 +151,12 @@ At 760 px and below, a compact sticky Filters button opens a drawer from the lef
 ## Currency and final-price filters
 
 The Price section supports All currencies, THB, NPR, and INR. A currency selection limits results to that currency; amounts are never converted or compared across currencies. Range inputs are disabled until a currency is selected. Changing currency clears the previous bounds, and Clear range removes both bounds while retaining the currency.
+
+## Sorting and provider pagination
+
+Results support Relevance, Price: low to high, Price: high to low, and Highest rated. Sorting applies to every matching provider before pagination and also orders services within each card.
+
+- **Relevance:** exact title matches rank first, then partial title matches, provider-name matches, and category/subcategory matches. A provider uses its best matching service's rank. With no search query, providers and services are alphabetical. Ties use provider name then ID, and service title then ID, so input order does not change the result.
+- **Price:** ascending ranks a provider by its cheapest matching service; descending uses its most expensive matching service. Rows follow the same direction. Both use exact final prices, with unavailable prices last within each currency. A wellness service uses its displayed lowest qualifying duration's price in both directions, rather than a hidden higher-priced option.
+- **Currencies:** with All currencies selected, price sorting uses labelled sections in THB, NPR, INR order. Other currency codes follow alphabetically with unavailable pricing. Numeric amounts are compared only within the same currency; there is no conversion or overall cross-currency cheapest provider.
+- **Rating:** rated providers appear highest first and unrated providers last, including after a zero rating. Name and ID break rating ties. Services within each card retain relevance ordering, or alphabetical ordering without a query.

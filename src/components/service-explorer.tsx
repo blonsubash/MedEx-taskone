@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { resolveCategoryState } from "@/lib/catalog/category-state";
 import type { Category } from "@/lib/catalog/types";
@@ -9,10 +9,12 @@ import type { LocationCountry, ProviderOption } from "@/lib/catalog/filter-optio
 import { loadCatalog } from "@/lib/catalog/load";
 import { getProviderGroups, prepareServices } from "@/lib/catalog/results";
 import type { PricedService } from "@/lib/catalog/results";
+import { paginateProviderGroups, sortProviderGroups } from "@/lib/catalog/sorting";
 import { parseExplorerState, serializeExplorerState } from "@/lib/explorer-state";
 import { useExplorerState } from "./explorer-state-provider";
 import { ExplorerSidebar } from "./explorer-sidebar";
-import { ProviderCard } from "./provider-card";
+import { ProviderResults } from "./provider-results";
+import { ProviderPagination, ResultSort } from "./result-controls";
 
 type CatalogState =
   | { status: "loading" }
@@ -23,6 +25,7 @@ export function ServiceExplorer() {
   const { state, update } = useExplorerState();
   const [catalog, setCatalog] = useState<CatalogState>({ status: "loading" });
   const [attempt, setAttempt] = useState(0);
+  const resultsHeading = useRef<HTMLHeadingElement>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -60,10 +63,29 @@ export function ServiceExplorer() {
   }, [catalog, state, update]);
 
   const groups = useMemo(
-    () => catalog.status === "ready" ? getProviderGroups(catalog.entries, effectiveState) : [],
+    () => catalog.status === "ready" ? sortProviderGroups(getProviderGroups(catalog.entries, effectiveState), effectiveState) : [],
     [catalog, effectiveState],
   );
   const serviceCount = groups.reduce((count, group) => count + group.services.length, 0);
+  const page = paginateProviderGroups(groups, effectiveState.page);
+
+  useEffect(() => {
+    if (catalog.status !== "ready") return;
+    const params = new URLSearchParams(window.location.search);
+    const latest = parseExplorerState(params);
+    // A clamp from an older render must not overwrite newer filter navigation.
+    if (serializeExplorerState(latest).toString() !== serializeExplorerState(effectiveState).toString()) return;
+    const rawPage = params.get("page");
+    if (latest.page !== page.page || (rawPage !== null && rawPage !== String(page.page))) {
+      update({ page: page.page }, "replace");
+    }
+  }, [catalog.status, effectiveState, page.page, update]);
+
+  function changePage(nextPage: number) {
+    update({ page: nextPage });
+    resultsHeading.current?.focus({ preventScroll: true });
+    resultsHeading.current?.scrollIntoView({ block: "start" });
+  }
 
   return (
     <section className="explorer" aria-label="Services by provider" aria-busy={catalog.status === "loading"}>
@@ -75,12 +97,13 @@ export function ServiceExplorer() {
         ready={catalog.status === "ready"} />
       <div className="explorer-results">
         <div className="results-heading">
-          <h2>Explore providers</h2>
+          <h2 ref={resultsHeading} tabIndex={-1}>Explore providers</h2>
           <p className="results-count" role="status">
             {catalog.status === "loading" ? "Loading services…" : catalog.status === "error"
               ? "Services could not be loaded" : `${serviceCount.toLocaleString("en-US")} ${serviceCount === 1 ? "service" : "services"} across ${groups.length} ${groups.length === 1 ? "provider" : "providers"}`}
           </p>
         </div>
+        <ResultSort state={effectiveState} update={update} ready={catalog.status === "ready"} />
         {catalog.status === "loading" && (
           <div className="provider-grid" aria-hidden="true">
             {[0, 1, 2, 3].map((id) => <div className="provider-skeleton" key={id}>
@@ -103,9 +126,13 @@ export function ServiceExplorer() {
           </div>
         )}
         {catalog.status === "ready" && (groups.length ? (
-          <div className="provider-grid" key={serializeExplorerState(effectiveState).toString()}>
-            {groups.map((group) => <ProviderCard key={group.provider.id} group={group} />)}
-          </div>
+          <>
+            <ProviderPagination result={page} onPage={changePage} position="top" />
+            <ProviderResults key={serializeExplorerState(effectiveState).toString()} groups={page.groups}
+              separateCurrencies={effectiveState.currency === null &&
+                (effectiveState.sort === "price-asc" || effectiveState.sort === "price-desc")} />
+            <ProviderPagination result={page} onPage={changePage} position="bottom" />
+          </>
         ) : (
           <div className="results-message">
             <h3>No services match these filters.</h3>

@@ -587,6 +587,74 @@ select:focus-visible {
   font-size: 0.875rem;
 }
 
+.result-sort {
+  margin-bottom: 1.25rem;
+}
+
+.result-sort > label {
+  margin-right: 0.625rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.result-sort select,
+.pagination select {
+  max-width: 100%;
+  min-height: 2.75rem;
+  padding: 0.625rem;
+  border: 1px solid #b5b5b5;
+  border-radius: 0.5rem;
+  color: var(--color-text);
+  background: var(--color-surface);
+  font: inherit;
+  font-size: 0.8125rem;
+}
+
+.pagination-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-block: 1.25rem;
+}
+
+.page-range {
+  color: var(--color-text-muted);
+  font-size: 0.8125rem;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.currency-results {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.currency-heading {
+  margin-bottom: 0.875rem;
+  font-size: 1rem;
+}
+
+.results-heading h2 {
+  scroll-margin-top: 1rem;
+}
+
+@media (max-width: 760px) {
+  .results-heading h2 {
+    scroll-margin-top: 5rem;
+  }
+
+  .pagination .secondary-button {
+    padding-inline: 0.625rem;
+  }
+}
+
 .provider-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
