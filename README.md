@@ -36,13 +36,15 @@ For a production preview, run `npm start` after a successful build.
 
 ## AI usage
 
-Codex assisted with the phase breakdown, initial application scaffold, tooling configuration, and setup verification.
+Codex assisted with the phase breakdown, initial application scaffold, tooling configuration, setup verification, mock endpoints tests , catalog normalization and their tests.
+
+I used Codex to speed up setup and implementation, explore edge cases in the supplied data, and draft targeted tests. The goal was to work efficiently within the exercise’s time limit while keeping each change small, verifiable, and understandable.
 
 ## Setup verification
 
-Verified a clean `npm ci`, linting, standalone type checking, the production build, and development-page rendering in a browser. Vitest starts successfully with an empty suite.
+Initial setup verified a clean `npm ci` and development-page rendering in a browser.
 
-Passes 16 route-handler tests, linting, standalone type checking, and the production build. HTTP checks confirm exact fixture responses, the default delay, forced failures, successful retries, invalid delay handling, and unsupported-method responses.
+Passes 49 tests (16 mock route-handler tests and 33 catalog normalization tests), linting, standalone type checking, and the production build. HTTP checks confirmed exact fixture responses, the default delay, forced failures, successful retries, invalid delay handling, and unsupported-method responses.
 
 Next.js supports ESLint 10, but some bundled plugins still declare older peer ranges; npm can report peer dependency warnings during installation. Linting was verified with this configuration; see the [Next.js ESLint documentation](https://nextjs.org/docs/app/api-reference/config/eslint).
 
@@ -86,3 +88,7 @@ curl 'http://localhost:3000/api/service?delay=0'
 ```
 
 Vitest exercises the actual route handlers with fake timers: exact response data, latency bounds, independent failures, retries, invalid delays, and cache headers
+
+## Catalog normalization
+
+`src/lib/catalog/types.ts` describes the raw API contracts and the UI models. The mock API fixture is checked against the raw contract at compile time. `normalizeCatalog` in `src/lib/catalog/normalize.ts` is a pure function that accepts all three endpoint collections; it does not fetch or import the fixture. It returns visible services and provider/category/subcategory maps keyed by IDs.

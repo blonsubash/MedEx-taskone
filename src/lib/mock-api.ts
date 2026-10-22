@@ -1,8 +1,10 @@
 import "server-only";
 
 import fixture from "../../data/task1-service-explorer.json";
+import type { RawCatalog } from "./catalog/types";
 
-type Collection = "categories" | "providers" | "services";
+const data: RawCatalog = fixture;
+type Collection = keyof RawCatalog;
 
 const DEFAULT_DELAY_MS = 400;
 const MAX_DELAY_MS = 5_000;
@@ -47,5 +49,5 @@ export async function getMockCollection(
     );
   }
 
-  return Response.json(fixture[collection], { headers });
+  return Response.json(data[collection], { headers });
 }
