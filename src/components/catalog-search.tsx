@@ -5,6 +5,12 @@ import { useEffect, useMemo, useRef } from "react";
 import type { ExplorerPatch } from "@/lib/explorer-state";
 import { createSearchScheduler, normalizeSearchQuery } from "@/lib/search";
 
+export function resetCatalogSearch() {
+  // Trigger the search form's reset handler, including pending debounce cancellation.
+  const form = document.getElementById("catalog-search-form");
+  if (form instanceof HTMLFormElement) form.reset();
+}
+
 export function CatalogSearch({ query, update, immediate = false }: {
   query: string;
   immediate?: boolean;

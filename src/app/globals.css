@@ -605,6 +605,79 @@ select:focus-visible {
   font-size: 0.875rem;
 }
 
+.applied-filters {
+  margin-bottom: 1.25rem;
+}
+
+.applied-filters-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.applied-filters-heading h3 {
+  font-size: 0.875rem;
+}
+
+.clear-filters-button {
+  min-height: 2.75rem;
+  padding: 0.5rem;
+  color: var(--color-primary);
+  background: transparent;
+  border: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: start;
+  gap: 0.5rem;
+  max-height: 9rem;
+  padding: 3px;
+  margin: -3px;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  list-style: none;
+}
+
+.filter-chips li {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.filter-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  max-width: 100%;
+  min-height: 2.75rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #dfbde9;
+  border-radius: 0.5rem;
+  color: var(--color-primary);
+  background: #f8f0fc;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  text-align: left;
+}
+
+.filter-chip:hover,
+.clear-filters-button:hover {
+  background: #f1e2f8;
+}
+
+.filter-chip-label {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
 .result-sort {
   margin-bottom: 1.25rem;
 }

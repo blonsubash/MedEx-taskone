@@ -44,7 +44,7 @@ I used Codex to speed up setup and implementation, explore edge cases in the sup
 
 Initial setup verified a clean `npm ci` and development-page rendering in a browser.
 
-All 338 tests pass, covering mock endpoints, catalog normalization, pricing, URL state, provider results, filter controls, search, mobile drafts, currency-scoped price ranges, sorting, pagination, and live facet counts. Lint, standalone type checking, and the production build also pass. HTTP checks confirmed exact fixture responses, the default delay, forced failures, successful retries, invalid delay handling, and unsupported-method responses.
+All 355 tests pass, covering mock endpoints, catalog normalization, pricing, URL state, provider results, filter controls, search, mobile drafts, currency-scoped price ranges, sorting, pagination, live facet counts, and applied filter summaries. Lint, standalone type checking, and the production build also pass. HTTP checks confirmed exact fixture responses, the default delay, forced failures, successful retries, invalid delay handling, and unsupported-method responses.
 
 Next.js supports ESLint 10, but some bundled plugins still declare older peer ranges; npm can report peer dependency warnings during installation. Linting was verified with this configuration; see the [Next.js ESLint documentation](https://nextjs.org/docs/app/api-reference/config/eslint).
 
@@ -174,3 +174,7 @@ Results support Relevance, Price: low to high, Price: high to low, and Highest r
 | Subcategory  | Selected child; the parent remains                                         |
 | Provider     | All selected providers, so each provider has an independent count          |
 | Currency     | Currency and its dependent price bounds, matching currency-switch behavior |
+
+## Applied filter summaries
+
+The results show a chip for each applied search, service type, category/subcategory, provider, location, currency, price bound, and home-test requirement. Labels use catalog names, provider locations, category types, and exact currency-scoped bounds without rounding. The results heading retains the full matching service/provider totals. The chip list has a bounded height and shows the number of applied choices.

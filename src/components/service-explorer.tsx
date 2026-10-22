@@ -2,6 +2,9 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import { clearFiltersPatch } from "@/lib/applied-filters";
+import { AppliedFilters } from "./applied-filters";
+import { resetCatalogSearch } from "./catalog-search";
 import { resolveCategoryState } from "@/lib/catalog/category-state";
 import type { Category } from "@/lib/catalog/types";
 import { getLocationOptions, getProviderOptions } from "@/lib/catalog/filter-options";
@@ -87,6 +90,13 @@ export function ServiceExplorer() {
     resultsHeading.current?.scrollIntoView({ block: "start" });
   }
 
+  function clearFilters() {
+    resetCatalogSearch();
+    update(clearFiltersPatch());
+    resultsHeading.current?.focus({ preventScroll: true });
+    resultsHeading.current?.scrollIntoView({ block: "nearest" });
+  }
+
   return (
     <section className="explorer" aria-label="Services by provider" aria-busy={catalog.status === "loading"}>
       <ExplorerSidebar state={effectiveState} update={update}
@@ -103,6 +113,10 @@ export function ServiceExplorer() {
               ? "Services could not be loaded" : `${serviceCount.toLocaleString("en-US")} ${serviceCount === 1 ? "service" : "services"} across ${groups.length} ${groups.length === 1 ? "provider" : "providers"}`}
           </p>
         </div>
+        <AppliedFilters state={effectiveState} update={update} clear={clearFilters} resultsHeading={resultsHeading}
+          labels={{ categories: catalog.status === "ready" ? catalog.categories : [],
+            providers: catalog.status === "ready" ? catalog.providers : [],
+            locations: catalog.status === "ready" ? catalog.locations : [], ready: catalog.status === "ready" }} />
         <ResultSort state={effectiveState} update={update} ready={catalog.status === "ready"} />
         {catalog.status === "loading" && (
           <div className="provider-grid" aria-hidden="true">
@@ -137,8 +151,7 @@ export function ServiceExplorer() {
           <div className="results-message">
             <h3>No services match these filters.</h3>
             <p>Try a broader search to explore more care options.</p>
-            <button type="reset" form="catalog-search-form" className="primary-button"
-              onClick={() => update(parseExplorerState(new URLSearchParams()))}>Clear filters</button>
+            <button type="button" className="primary-button" onClick={clearFilters}>Clear filters</button>
           </div>
         ))}
       </div>
