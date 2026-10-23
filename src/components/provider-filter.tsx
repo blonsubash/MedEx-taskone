@@ -2,7 +2,7 @@
 
 import { FacetCount } from "./facet-count";
 
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 
 import { filterProviderOptions } from "@/lib/catalog/filter-options";
 import type { ProviderOption } from "@/lib/catalog/filter-options";
@@ -16,6 +16,17 @@ export function ProviderFilter({ providers, selectedIds, update, ready, counts }
   counts: Map<number, number> | null;
 }) {
   const [query, setQuery] = useState("");
+  const picker = useRef<HTMLDetailsElement>(null);
+  const nextFocus = useRef<number | "search" | null>(null);
+  useLayoutEffect(() => {
+    if (nextFocus.current === null) return;
+    const inputs = picker.current?.querySelectorAll<HTMLInputElement>("input[name='provider']");
+    const choice = [...(inputs ?? [])].find((input) => Number(input.value) === nextFocus.current && !input.matches(":disabled"));
+    const target = choice ?? picker.current?.querySelector<HTMLInputElement>("#provider-query");
+    nextFocus.current = null;
+    target?.focus({ preventScroll: true });
+    target?.scrollIntoView({ block: "nearest" });
+  }, [selectedIds]);
   const byId = new Map(providers.map((provider) => [provider.id, provider]));
   const selected = selectedIds.map((id) => byId.get(id) ?? {
     id, name: `${ready ? "Unavailable" : "Selected"} provider #${id}`, location: "",
@@ -27,10 +38,11 @@ export function ProviderFilter({ providers, selectedIds, update, ready, counts }
       <li key={provider.id}>
         <label className="provider-choice">
           <input type="checkbox" name="provider" value={provider.id}
-            disabled={counts !== null && !selectedIds.includes(provider.id) && !counts.get(provider.id)} checked={selectedIds.includes(provider.id)} onChange={(event) => update({
-            providerIds: event.target.checked ? [...selectedIds, provider.id]
-              : selectedIds.filter((id) => id !== provider.id),
-          })} />
+            disabled={counts !== null && !selectedIds.includes(provider.id) && !counts.get(provider.id)} checked={selectedIds.includes(provider.id)} onChange={(event) => {
+              nextFocus.current = provider.id;
+              update({ providerIds: event.target.checked ? [...selectedIds, provider.id]
+                : selectedIds.filter((id) => id !== provider.id) });
+            }} />
           <span><span className="provider-choice-name">{provider.name} <FacetCount count={counts ? counts.get(provider.id) ?? 0 : undefined} /></span>
             {provider.location && <span className="provider-choice-location">{provider.location}</span>}
           </span>
@@ -40,7 +52,7 @@ export function ProviderFilter({ providers, selectedIds, update, ready, counts }
   }
 
   return (
-    <details className="provider-picker">
+    <details ref={picker} className="provider-picker">
       <summary><span>Providers</span>{" "}<span className="provider-selection-count">
         {selectedIds.length ? `${selectedIds.length} selected` : "All providers"}
       </span></summary>
@@ -54,7 +66,7 @@ export function ProviderFilter({ providers, selectedIds, update, ready, counts }
               aria-describedby="provider-search-help" />
           </div>
           <button type="button" className="secondary-button" disabled={selectedIds.length === 0}
-            onClick={() => update({ providerIds: [] })}>Clear provider selection</button>
+            onClick={() => { nextFocus.current = "search"; update({ providerIds: [] }); }}>Clear provider selection</button>
         </div>
         <p className="filter-help" id="provider-search-help">Choose one or more providers. This search only narrows the provider list.</p>
         <div className="provider-options" role="region" aria-label="Provider choices" tabIndex={0}>

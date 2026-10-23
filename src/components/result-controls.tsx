@@ -40,7 +40,7 @@ export function ProviderPagination({ result, onPage, position }: {
   const id = useId();
   if (result.totalProviders === 0) return null;
   return <div className="pagination-bar">
-    <p className="page-range" role={position === "top" ? "status" : undefined}>Showing providers {result.start}–{result.end} of {result.totalProviders}</p>
+    <p className="page-range">Showing providers {result.start}–{result.end} of {result.totalProviders}</p>
     {result.pageCount > 1 && <nav className="pagination" aria-label={`Provider pagination ${position}`}>
       <button className="secondary-button" type="button" disabled={result.page === 1}
         onClick={() => onPage(result.page - 1)}>Previous</button>

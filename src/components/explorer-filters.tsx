@@ -24,6 +24,7 @@ type Props = {
 };
 
 export function ExplorerFilters({ state, update, locations, categories, providers, ready, facets, immediate = false }: Props) {
+  const Heading = immediate ? "h3" : "h2";
   const locationValue = state.location ? `${state.location.kind}:${state.location.id}` : "";
   const locationChoices = new Map<string, LocationFilter>();
   for (const country of locations) {
@@ -39,7 +40,7 @@ export function ExplorerFilters({ state, update, locations, categories, provider
 
   return (
     <div className="filter-panel" role="region" aria-labelledby="filters-title">
-      <h2 id="filters-title">Filter services</h2>
+      <Heading id="filters-title">Filter services</Heading>
       <p className="filter-help facet-help">Counts show services matching the other filters. Selected choices can still be removed at zero.</p>
       <div className="filter-fields">
         <fieldset className="filter-field" disabled={!ready}>

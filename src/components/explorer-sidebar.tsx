@@ -14,6 +14,7 @@ import type { ExplorerPatch, ExplorerState } from "@/lib/explorer-state";
 import { createFilterDraft, updateFilterDraft } from "@/lib/filter-draft";
 import { CatalogSearch } from "./catalog-search";
 import { ExplorerFilters } from "./explorer-filters";
+import { LiveStatus } from "./live-status";
 
 const MOBILE_QUERY = "(max-width: 760px)";
 function subscribeToViewport(notify: () => void) {
@@ -156,6 +157,7 @@ function FilterDrawer({ children, count, ready, cancel, apply, trigger, baseline
         <button type="button" className="drawer-close" aria-label="Close filters" autoFocus onClick={cancel}>×</button>
       </header>
       <div className="drawer-body">{children}</div>
+      <LiveStatus message={ready ? `${count.toLocaleString("en-US")} ${count === 1 ? "service matches" : "services match"} your draft filters. Show services to apply.` : "Loading services."} />
       <footer className="drawer-footer">
         <button type="button" className="secondary-button" onClick={cancel}>Cancel</button>
         <button type="button" className="primary-button" disabled={!ready} onClick={apply}>

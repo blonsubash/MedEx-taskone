@@ -68,12 +68,12 @@ function PriceRange({ state, update, immediate }: {
       <label htmlFor="minimum-price">Minimum
         <input ref={minimum} id="minimum-price" name="min" type="text" inputMode="decimal"
           autoComplete="off" defaultValue={state.minPrice ?? ""} placeholder="No minimum"
-          disabled={state.currency === null} aria-describedby="price-range-help price-range-notice" />
+          disabled={state.currency === null} aria-label={`Minimum price${state.currency ? ` in ${state.currency}` : ""}`} aria-describedby="price-range-help price-range-notice" />
       </label>
       <label htmlFor="maximum-price">Maximum
         <input ref={maximum} id="maximum-price" name="max" type="text" inputMode="decimal"
           autoComplete="off" defaultValue={state.maxPrice ?? ""} placeholder="No maximum"
-          disabled={state.currency === null} aria-describedby="price-range-help price-range-notice" />
+          disabled={state.currency === null} aria-label={`Maximum price${state.currency ? ` in ${state.currency}` : ""}`} aria-describedby="price-range-help price-range-notice" />
       </label>
     </div>
     <div className="price-range-actions">

@@ -11,6 +11,7 @@ export default async function HomePage({
   const initialState = parseExplorerState(toSearchParams(await searchParams));
   return (
     <ExplorerStateProvider initialState={initialState}>
+      <a className="skip-link" href="#explorer-results">Skip to results</a>
       <header className="site-header">
         <span className="brand">MedEx</span>
         <span className="site-label">Service Explorer</span>

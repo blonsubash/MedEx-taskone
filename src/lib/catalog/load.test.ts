@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import fixture from "../../../data/task1-service-explorer.json";
-import { loadCatalog } from "./load";
+import { CatalogLoadError, loadCatalog, readCatalogSimulation } from "./load";
 
 const collections = {
   "/api/category/active": fixture.categories,
@@ -30,10 +30,47 @@ describe("loadCatalog", () => {
     expect(catalog.providersById.size).toBe(65);
   });
 
-  it.each(Object.keys(collections))("rejects the entire load when %s fails", async (failedUrl) => {
+  it.each([
+    ["categories", "/api/category/active"], ["providers", "/api/providers"], ["services", "/api/service"],
+  ])("rejects the entire load when %s fails", async (collection, failedUrl) => {
     vi.stubGlobal("fetch", vi.fn(async (url: keyof typeof collections) =>
       url === failedUrl ? new Response(null, { status: 503 }) : Response.json(collections[url])));
-    await expect(loadCatalog(new AbortController().signal)).rejects.toThrow("503");
+    await expect(loadCatalog(new AbortController().signal)).rejects.toMatchObject({
+      name: "CatalogLoadError", collection,
+      message: expect.stringContaining("503"),
+    });
+  });
+
+  it("identifies malformed JSON with its endpoint", async () => {
+    vi.stubGlobal("fetch", vi.fn(async (url: keyof typeof collections) => url === "/api/providers"
+      ? new Response("{") : Response.json(collections[url])));
+    await expect(loadCatalog(new AbortController().signal)).rejects.toMatchObject({ collection: "providers" });
+  });
+
+  it("forces only the chosen endpoint to fail and retries all collections without the failure", async () => {
+    const fetcher = vi.fn(async (url: string) => {
+      const parsed = new URL(url, "http://localhost");
+      return parsed.searchParams.has("fail") ? new Response(null, { status: 503 })
+        : Response.json(collections[parsed.pathname as keyof typeof collections]);
+    });
+    vi.stubGlobal("fetch", fetcher);
+    const params = new URLSearchParams("mockFail=providers&mockDelay=1200&q=checkup&currency=THB");
+    await expect(loadCatalog(new AbortController().signal, readCatalogSimulation(params))).rejects.toBeInstanceOf(CatalogLoadError);
+    expect(fetcher.mock.calls.map(([url]) => url)).toEqual([
+      "/api/category/active?delay=1200", "/api/providers?delay=1200&fail=true", "/api/service?delay=1200",
+    ]);
+    const catalog = await loadCatalog(new AbortController().signal, readCatalogSimulation(params, true));
+    expect(catalog.services).toHaveLength(2853);
+    expect(fetcher.mock.calls.slice(3).every(([url]) => !url.includes("fail="))).toBe(true);
+    expect(params.toString()).toBe("mockFail=providers&mockDelay=1200&q=checkup&currency=THB");
+  });
+
+  it.each(["mockFail=__proto__&mockDelay=-1", "mockFail=bad&mockDelay=5001", "mockDelay=", "mockDelay=1.5", "mockDelay=Infinity"])("ignores invalid simulation controls: %s", (query) => {
+    expect(readCatalogSimulation(new URLSearchParams(query))).toEqual({});
+  });
+
+  it.each([0, 5000])("accepts the delay boundary %i", (delay) => {
+    expect(readCatalogSimulation(new URLSearchParams(`mockDelay=${delay}`))).toEqual({ delay });
   });
 
   it("rejects a non-array response instead of displaying a partial catalog", async () => {

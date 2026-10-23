@@ -19,7 +19,7 @@ export function ProviderResults({ groups, separateCurrencies }: {
     {[...currencies].map(([currency, providers]) => <section key={currency} aria-label={`${currency} providers`}>
       <h3 className="currency-heading">{currency} providers</h3>
       <div className="provider-grid">
-        {providers.map((group) => <ProviderCard key={group.provider.id} group={group} />)}
+        {providers.map((group) => <ProviderCard key={group.provider.id} group={group} headingLevel={4} />)}
       </div>
     </section>)}
   </div>;

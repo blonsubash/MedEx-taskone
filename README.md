@@ -34,17 +34,25 @@ For a production preview, run `npm start` after a successful build.
 - **Vitest:** prepare a Node-based runner for the domain logic tests. A browser/component test environment can be added if needed later.
 - **npm:** use one package manager and a lockfile for reproducible dependency installation.
 
+## Time budget
+
+Loading and recovery was completed after the eight-hour mark. I continued past the time limit to finish checking failure and retry behavior across the three endpoints, including keeping the current filters and page intact. Missing provider or category data can affect both results and facet counts, so I spent extra time verifying that failures were shown clearly and retries restored a complete catalog. The additional work included offline recovery tests and desktop/mobile browser checks. This recovery work falls outside the original eight-hour budget.
+
+The accessibility review was also completed after the eight-hour mark. I used the additional time to check the full keyboard flow and fix issues found during that review, including focus being lost when a provider was selected and overlapping result announcements. I also checked the mobile drawer’s focus behavior and control contrast. These checks took extra time, but they helped ensure the filters and results could be used without a mouse.
+
 ## AI usage
 
-Codex assisted with the phase breakdown, initial application scaffold, tooling configuration, setup verification, mock endpoint tests, catalog normalization, and their tests.
+Codex assisted with the phase breakdown, application scaffold and tooling, mock endpoints, catalog normalization, pricing and targeted tests, and browser verification.
 
 I used Codex to speed up setup and implementation, explore edge cases in the supplied data, and draft targeted tests. The goal was to work efficiently within the exercise’s time limit while keeping each change small, verifiable, and understandable.
+
+Codex also assisted with the accessibility review, fixes, and keyboard/browser checks.
 
 ## Setup verification
 
 Initial setup verified a clean `npm ci` and development-page rendering in a browser.
 
-All 359 tests pass, covering mock endpoints, catalog normalization, pricing, URL state, provider results, filter controls, search, mobile drafts, currency-scoped price ranges, sorting, pagination, live facet counts, and applied filter summaries. Lint, standalone type checking, and the production build also pass. HTTP checks confirmed exact fixture responses, the default delay, forced failures, successful retries, invalid delay handling, and unsupported-method responses.
+All 378 tests pass, covering mock endpoints, catalog normalization, pricing, URL state, provider results, filter controls, search, mobile drafts, currency-scoped price ranges, sorting, pagination, live facet counts, applied filter summaries, endpoint retries, slow loads, timeouts, and offline recovery. Lint, standalone type checking, and the production build also pass. HTTP checks confirmed exact fixture responses, the default delay, forced failures, successful retries, invalid delay handling, and unsupported-method responses.
 
 Next.js supports ESLint 10, but some bundled plugins still declare older peer ranges; npm can report peer dependency warnings during installation. Linting was verified with this configuration; see the [Next.js ESLint documentation](https://nextjs.org/docs/app/api-reference/config/eslint).
 
@@ -88,6 +96,10 @@ curl 'http://localhost:3000/api/service?delay=0'
 ```
 
 Vitest exercises the actual route handlers with fake timers: exact response data, latency bounds, independent failures, retries, invalid delays, and cache headers
+
+## Loading and recovery
+
+The explorer waits for **all three collections** before displaying results. A missing provider or category collection would make joins, visibility rules and facet totals unreliable, so successful endpoints are not shown as partial results. Each endpoint error names the collection that failed. Try again requests the complete catalog, preserves current URL filters/sorting/page, and focuses the results heading. A valid page stays selected; normal validation still repairs an out-of-range page after data becomes available.
 
 ## Catalog normalization
 
@@ -178,3 +190,9 @@ Results support Relevance, Price: low to high, Price: high to low, and Highest r
 ## Applied filter summaries
 
 The results show a chip for each applied search, service type, category/subcategory, provider, location, currency, price bound, and home-test requirement. Labels use catalog names, provider locations, category types, and exact currency-scoped bounds without rounding. The results heading retains the full matching service/provider totals. The chip list has a bounded height and shows the number of applied choices.
+
+## Accessibility review
+
+- A visible-on-focus Skip to results link moves directly to the named results region. Focus indicators cover links, controls, headings and scroll regions. Input/select borders were darkened to distinguish controls from their backgrounds.
+- Provider selection retains checkbox focus when an option moves into or out of the selected list. If an unchecked option disappears under the provider search, focus returns to that search. Clearing the selection also returns focus there.
+- Each service expansion button names its provider. Opening it focuses the independently scrollable service region; End/arrow keys scroll that region, Tab reaches Show fewer services, and collapse retains button focus. Provider/service headings nest below the results and optional currency headings. Rating and original-price context use accessible text.

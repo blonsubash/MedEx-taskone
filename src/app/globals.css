@@ -14,6 +14,7 @@
   --color-background: #f5f5f5;
   --color-surface: #ffffff;
   --color-border: #e7e7e7;
+  --color-control-border: #858585;
   --gradient-brand: linear-gradient(
     90deg,
     var(--color-primary-light),
@@ -22,6 +23,24 @@
 
   color: var(--color-text);
   background: var(--color-background);
+}
+
+.skip-link {
+  position: fixed;
+  top: 0.75rem;
+  left: 1.25rem;
+  z-index: 10;
+  padding: 0.875rem 1rem;
+  border: 2px solid var(--color-primary);
+  border-radius: 0.5rem;
+  color: var(--color-primary);
+  background: var(--color-surface);
+  font-weight: 700;
+  transform: translateY(-200%);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
 }
 
 .site-header {
@@ -80,11 +99,9 @@ button {
   cursor: pointer;
 }
 
-button:focus-visible,
-input:focus-visible,
-select:focus-visible {
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
   outline: 3px solid var(--color-primary);
-  outline-offset: 4px;
+  outline-offset: 2px;
 }
 
 .explorer {
@@ -260,7 +277,7 @@ select:focus-visible {
   background: var(--color-surface);
 }
 
-.filter-panel h2 {
+.filter-panel :is(h2, h3) {
   margin: 0 0 1.25rem;
   font-size: 1.0625rem;
 }
@@ -335,7 +352,7 @@ select:focus-visible {
   width: 100%;
   min-height: 2.75rem;
   padding: 0.625rem 0.75rem;
-  border: 1px solid #b5b5b5;
+  border: 1px solid var(--color-control-border);
   border-radius: 0.5rem;
   background: var(--color-surface);
   color: var(--color-text);
@@ -406,7 +423,7 @@ select:focus-visible {
   width: 100%;
   min-height: 2.75rem;
   padding: 0.625rem 0.75rem;
-  border: 1px solid #b5b5b5;
+  border: 1px solid var(--color-control-border);
   border-radius: 0.5rem;
   color: var(--color-text);
   background: var(--color-surface);
@@ -473,7 +490,7 @@ select:focus-visible {
   min-height: 2.75rem;
   margin-top: 0.5rem;
   padding: 0.625rem 0.5rem;
-  border: 1px solid #b5b5b5;
+  border: 1px solid var(--color-control-border);
   border-radius: 0.5rem;
   color: var(--color-text);
   background: var(--color-surface);
@@ -640,8 +657,8 @@ select:focus-visible {
   align-content: start;
   gap: 0.5rem;
   max-height: 9rem;
-  padding: 3px;
-  margin: -3px;
+  padding: 6px;
+  margin: -6px;
   overflow-y: auto;
   overscroll-behavior-y: contain;
   list-style: none;
@@ -693,7 +710,7 @@ select:focus-visible {
   max-width: 100%;
   min-height: 2.75rem;
   padding: 0.625rem;
-  border: 1px solid #b5b5b5;
+  border: 1px solid var(--color-control-border);
   border-radius: 0.5rem;
   color: var(--color-text);
   background: var(--color-surface);
@@ -785,7 +802,7 @@ select:focus-visible {
   font-weight: 700;
 }
 
-.provider-header h2 {
+.provider-header :is(h3, h4) {
   margin: 0;
   font-size: 1.0625rem;
   line-height: 1.4;
@@ -869,7 +886,7 @@ select:focus-visible {
   text-transform: uppercase;
 }
 
-.service-row h3 {
+.service-row :is(h4, h5) {
   margin: 0;
   font-size: 0.9375rem;
   line-height: 1.5;
@@ -986,6 +1003,15 @@ select:focus-visible {
 
 .primary-button:hover {
   background: var(--color-primary-dark);
+}
+
+.connection-notice {
+  padding: 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+  background: #f8f0fc;
+  color: var(--color-text);
+  line-height: 1.6;
 }
 
 .provider-skeleton {
